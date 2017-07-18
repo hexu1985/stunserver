@@ -42,11 +42,22 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <memory.h>
+
+#ifdef IS_ANDROID
+#include "../ifaddrs/ifaddrs.h"
+#else
 #include <ifaddrs.h>
+#endif
+
 #include <net/if.h>
 #include <stdarg.h>
 #include <math.h>
+
+#ifdef IS_ANDROID
+#include <linux/termios.h>
+#else
 #include <sys/termios.h>
+#endif
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
