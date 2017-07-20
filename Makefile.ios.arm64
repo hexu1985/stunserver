@@ -3,21 +3,19 @@
 all: everything copybin
 
 everything:
-	cp common.inc.android common.inc
+	cp common.inc.ios.arm64 common.inc
 	$(MAKE) $(T) --directory=common
 	$(MAKE) $(T) --directory=stuncore
 	$(MAKE) $(T) --directory=networkutils
-	$(MAKE) $(T) --directory=ifaddrs
 	$(MAKE) $(T) --directory=export
 
 copybin: everything
 	rm -f ./stunserver ./stunclient ./stuntestcode
-	rm -f ./lib_android/*.a
-	cp ifaddrs/libifaddrs.a ./lib_android/
-	cp export/libexport.a ./lib_android/
-	cp stuncore/libstuncore.a ./lib_android/
-	cp networkutils/libnetworkutils.a ./lib_android/
-	cp common/libcommon.a ./lib_android/
+	rm -f ./lib_ios/arm64/*.a
+	cp export/libexport.a ./lib_ios/arm64/
+	cp stuncore/libstuncore.a ./lib_ios/arm64/
+	cp networkutils/libnetworkutils.a ./lib_ios/arm64/
+	cp common/libcommon.a ./lib_ios/arm64/
 
 debug: T := debug
 debug: all
