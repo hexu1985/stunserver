@@ -1,0 +1,3 @@
+1) 为系统配置多个IP
+#ifconfig eth0:0 192.168.0.1 netmask 255.255.255.0 up
+2) stunserver --mode full --primaryinterface INTERFACE --altinterface INTERFACE
