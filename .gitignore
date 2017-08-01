@@ -1,5 +1,6 @@
 nbproject/
 
+common.inc
 *.o
 *.gch
 *.a
@@ -12,4 +13,4 @@ stuntestcode
 stunclient.exe
 stunserver.exe
 stuntestcode.exe
-
+stunclient_c.exe

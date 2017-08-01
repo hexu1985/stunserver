@@ -1,0 +1,38 @@
+.PHONY: all everything copybin debug clean
+
+all: everything copybin
+
+everything:
+	cp common.inc.windows common.inc
+	$(MAKE) $(T) --directory=common
+	$(MAKE) $(T) --directory=stuncore
+	$(MAKE) $(T) --directory=networkutils
+	$(MAKE) $(T) --directory=export
+	$(MAKE) $(T) --directory=testcode
+	$(MAKE) $(T) --directory=client
+	$(MAKE) $(T) --directory=server
+	$(MAKE) $(T) --directory=testexport
+
+copybin: everything
+	rm -f ./stunserver ./stunclient ./stuntestcode
+	rm -f ./lib_windows/*.a
+	cp server/stunserver .
+	cp client/stunclient .
+	cp testcode/stuntestcode .
+	cp export/libexport.a ./lib_windows/
+	cp stuncore/libstuncore.a ./lib_windows/
+	cp networkutils/libnetworkutils.a ./lib_windows/
+	cp common/libcommon.a ./lib_windows/
+
+debug: T := debug
+debug: all
+
+profile: T := profile
+profile: all
+
+clean:	T := clean
+clean: everything
+	rm -f stunserver stunclient stuntestcode
+
+
+
