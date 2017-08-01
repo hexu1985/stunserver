@@ -1,11 +1,8 @@
-#ifndef	__unp_sock_ntop_h
-#define	__unp_sock_ntop_h
+#ifndef	__unp_sock_get_port_h
+#define	__unp_sock_get_port_h
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <sys/un.h>
-#include <string.h>
-#include <stdio.h>
 
 /* Define to 1 if the system supports IPv6 */
 #define IPV6    1
@@ -14,7 +11,7 @@
 extern "C" {
 #endif
 
-char *Sock_ntop(const struct sockaddr *, socklen_t);
+int sock_get_port(const struct sockaddr *, socklen_t);
 
 #ifdef  __cplusplus
 }   // extern "C"

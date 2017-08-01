@@ -2,6 +2,8 @@
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/stringbuffer.h"
 #include "json_util.h"
+#include "sock_ntop_host.h"
+#include "sock_get_port.h"
 
 using namespace rapidjson;
 
@@ -52,45 +54,125 @@ char *clone_from_string(const std::string &str)
 
 }
 
-boost::shared_ptr<StunClientArgs_C> Json2StunClientArgs_C(const std::string &args)
+std::shared_ptr<StunClientArgs_C> Json2StunClientArgs_C(const std::string &str)
 {
-    boost::shared_ptr<StunClientArgs_C> pargs = boost::shared_ptr<StunClientArgs_C>(new StunClientArgs_C, StunClientArgsDeleter()); 
-    stun_client_args_c_init(pargs.get());
+    std::shared_ptr<StunClientArgs_C> args = std::shared_ptr<StunClientArgs_C>(new StunClientArgs_C, StunClientArgsDeleter()); 
+    stun_client_args_c_init(args.get());
 
     Document document;
-    document.Parse(args.c_str());
+    document.Parse(str.c_str());
     if (document.HasParseError()) {
         return NULL;
     }
 
     if (document.HasMember("family")) {
-        pargs->family = document["family"].GetInt();
+        args->family = document["family"].GetInt();
     }
 
     if (document.HasMember("remoteServerHost")) {
-        pargs->remoteServerHost = clone_from_string(document["remoteServerHost"].GetString());
+        args->remoteServerHost = clone_from_string(document["remoteServerHost"].GetString());
     }
 
     if (document.HasMember("remoteServerPort")) {
-        pargs->remoteServerPort = document["remoteServerPort"].GetInt();
+        args->remoteServerPort = document["remoteServerPort"].GetInt();
     }
 
     if (document.HasMember("localAddr")) {
-        pargs->localAddr = clone_from_string(document["localAddr"].GetString());
+        args->localAddr = clone_from_string(document["localAddr"].GetString());
     }
 
     if (document.HasMember("localPort")) {
-        pargs->localPort = document["localPort"].GetInt();
+        args->localPort = document["localPort"].GetInt();
     }
 
     if (document.HasMember("mode")) {
-        pargs->mode = clone_from_string(document["mode"].GetString());
+        args->mode = clone_from_string(document["mode"].GetString());
     }
 
-    return pargs;
+    return args;
 }
 
-std::string StunClientResults_C2Json(const StunClientResults_C &results);
+std::string StunClientResults_C2Json(const StunClientResults_C &results)
+{
+    Document document;
+    document.SetObject();
+    Document::AllocatorType &allocator = document.GetAllocator();
 
-boost::shared_ptr<StunClientResults_C> Json2StunClientResults_C(const std::string &args);
+    document.AddMember("fBindingTestSuccess", results.fBindingTestSuccess, allocator);
+    document.AddMember("addrLocalHost", Value(Sock_ntop_host((const sockaddr *) &results.addrLocal, results.addrLocalLen), allocator), allocator);
+    document.AddMember("addrLocalPort", (int) ntohs(sock_get_port((const sockaddr *) &results.addrLocal, results.addrLocalLen)), allocator);
+    document.AddMember("addrMappedHost", Value(Sock_ntop_host((const sockaddr *) &results.addrMapped, results.addrMappedLen), allocator), allocator);
+    document.AddMember("addrMappedPort", (int) ntohs(sock_get_port((const sockaddr *) &results.addrMapped, results.addrMappedLen)), allocator);
+    document.AddMember("fBehaviorTestSuccess", results.fBehaviorTestSuccess, allocator);
+    document.AddMember("natType", (int) results.natType, allocator);
+
+    StringBuffer buffer;
+    Writer<rapidjson::StringBuffer> writer(buffer);
+    document.Accept(writer);
+    std::string str = buffer.GetString();
+    return str;
+}
+
+namespace {
+
+void sock_pton(struct sockaddr_in *addr, const std::string &ip, int port)
+{
+    addr->sin_family = AF_INET;
+    addr->sin_port = htons((uint16_t) port);
+    inet_pton(AF_INET, ip.c_str(), &addr->sin_addr); 
+}
+
+}
+
+std::shared_ptr<StunClientResults_C> Json2StunClientResults_C(const std::string &str)
+{
+    std::shared_ptr<StunClientResults_C> results = std::shared_ptr<StunClientResults_C>(new StunClientResults_C); 
+    memset(results.get(), 0, sizeof(StunClientResults_C));
+
+    Document document;
+    document.Parse(str.c_str());
+    if (document.HasParseError()) {
+        return NULL;
+    }
+
+    if (document.HasMember("fBindingTestSuccess")) {
+        results->fBindingTestSuccess = document["fBindingTestSuccess"].GetInt();
+    }
+
+    std::string addrLocalHost = "0.0.0.0";
+    if (document.HasMember("addrLocalHost")) {
+        addrLocalHost = document["addrLocalHost"].GetString();
+    }
+
+    int addrLocalPort = 0;
+    if (document.HasMember("addrLocalPort")) {
+        addrLocalPort = document["addrLocalPort"].GetInt();
+    }
+
+    sock_pton((sockaddr_in *) &results->addrLocal, addrLocalHost, addrLocalPort); 
+    results->addrLocalLen = sizeof(sockaddr_in); 
+
+    std::string addrMappedHost = "0.0.0.0";
+    if (document.HasMember("addrMappedHost")) {
+        addrMappedHost = document["addrMappedHost"].GetString();
+    }
+
+    int addrMappedPort = 0;
+    if (document.HasMember("addrMappedPort")) {
+        addrMappedPort = document["addrMappedPort"].GetInt();
+    }
+
+    sock_pton((sockaddr_in *) &results->addrMapped, addrMappedHost, addrMappedPort); 
+    results->addrMappedLen = sizeof(sockaddr_in); 
+
+    if (document.HasMember("fBehaviorTestSuccess")) {
+        results->fBehaviorTestSuccess = document["fBehaviorTestSuccess"].GetInt();
+    }
+
+    if (document.HasMember("natType")) {
+        results->natType = (NatType_C) document["natType"].GetInt();
+    }
+
+    return results;
+}
 

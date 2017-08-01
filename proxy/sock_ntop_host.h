@@ -1,5 +1,5 @@
-#ifndef	__unp_sock_ntop_h
-#define	__unp_sock_ntop_h
+#ifndef	__unp_sock_ntop_host_h
+#define	__unp_sock_ntop_host_h
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-char *Sock_ntop(const struct sockaddr *, socklen_t);
+char *Sock_ntop_host(const struct sockaddr *, socklen_t);
 
 #ifdef  __cplusplus
 }   // extern "C"

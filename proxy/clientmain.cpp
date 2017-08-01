@@ -4,6 +4,7 @@
 #include <errno.h>
 
 #include <getopt.h>
+#include <assert.h>
 
 #include <iostream>
 
@@ -17,8 +18,8 @@ void print_results(const struct StunClientResults_C *results)
     printf("\n======================================\n");
     printf("results:\n");
     printf("fBindingTestSuccess: %d\n", results->fBindingTestSuccess);
-    printf("addrLocal: %s\n", sock_ntop((const struct sockaddr *) &results->addrLocal, results->addrLocalLen));
-    printf("addrMapped: %s\n", sock_ntop((const struct sockaddr *) &results->addrMapped, results->addrMappedLen));
+    printf("addrLocal: %s\n", Sock_ntop((const struct sockaddr *) &results->addrLocal, results->addrLocalLen));
+    printf("addrMapped: %s\n", Sock_ntop((const struct sockaddr *) &results->addrMapped, results->addrMappedLen));
     printf("fBehaviorTestSuccess: %d\n", results->fBehaviorTestSuccess);
     printf("natType: %d\n", (int) results->natType);
     printf("\n======================================\n");
@@ -90,19 +91,26 @@ int main(int argc, char *argv[])
         i++;
     }
 
-    int ret;
-    struct StunClientResults_C results;
     std::string args_json = StunClientArgs_C2Json(args);
     std::cout << "args_json: " << args_json << std::endl;
-    boost::shared_ptr<StunClientArgs_C> pargs = Json2StunClientArgs_C(args_json);
+    auto pargs = Json2StunClientArgs_C(args_json);
     assert(pargs && "parse json fail");
+
+    int ret;
+    struct StunClientResults_C results;
     ret = stun_client_udp_loop(pargs.get(), &results);
     if (ret != 0) {
         printf("stun_client_udp_loop error: ret=%d, errno=%d\n", ret, errno);
         exit(ret);
     }
-
     print_results(&results);
+
+    std::string results_json = StunClientResults_C2Json(results);
+    std::cout << "results_json: " << results_json << std::endl;
+    auto presults = Json2StunClientResults_C(results_json); 
+    assert(presults);
+
+    print_results(presults.get());
 
     return 0;
 }
