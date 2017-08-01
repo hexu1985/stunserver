@@ -92,9 +92,11 @@ int main(int argc, char *argv[])
 
     int ret;
     struct StunClientResults_C results;
-    std::string args_json = StunClientArgs_C2json(args);
+    std::string args_json = StunClientArgs_C2Json(args);
     std::cout << "args_json: " << args_json << std::endl;
-    ret = stun_client_udp_loop(&args, &results);
+    boost::shared_ptr<StunClientArgs_C> pargs = Json2StunClientArgs_C(args_json);
+    assert(pargs && "parse json fail");
+    ret = stun_client_udp_loop(pargs.get(), &results);
     if (ret != 0) {
         printf("stun_client_udp_loop error: ret=%d, errno=%d\n", ret, errno);
         exit(ret);
