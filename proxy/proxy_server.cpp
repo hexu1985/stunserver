@@ -1,4 +1,5 @@
 #include <thread>
+#include <iostream>
 #include "tcp_listen.h"
 #include "sock_ntop.h"
 #include "readline.h"
@@ -82,12 +83,12 @@ static void doit(int sockfd)
         printf("stun_client_udp_loop error: ret=%d, errno=%d\n", ret, errno);
         return;
     }
-#ifdef DEBUG
+#ifndef NDEBUG
     print_results(&results);
 #endif
 
     std::string results_json = StunClientResults_C2Json(results);
-#ifdef DEBUG
+#ifndef NDEBUG
     std::cout << "results_json: " << results_json << std::endl;
 #endif
 
