@@ -1,7 +1,7 @@
 include ../common.inc
 
-PROJECT_TARGET := stunclient
-PROJECT_OBJS := clientmain.o json_util.o sock_ntop.o sock_ntop_host.o sock_get_port.o
+PROJECT_TARGET := stunclient stunproxyserver
+PROJECT_OBJS := clientmain.o json_util.o sock_ntop.o sock_ntop_host.o sock_get_port.o tcp_listen.o readline.o writen.o
 	
 
 #rapidjson: cd .. && git clone https://github.com/miloyip/rapidjson.git
@@ -16,6 +16,9 @@ clean:
 	rm -f $(PROJECT_OBJS) $(PROJECT_TARGET) 
 
 stunclient: clientmain.o json_util.o sock_ntop.o sock_ntop_host.o sock_get_port.o
+	$(LINK.cpp) -o $@ $^ $(LIB_PATH) $(LIBS) $(SOCKET_LIBS) $(CRYPTO_LIBS)
+
+stunproxyserver: proxy_server.o json_util.o sock_ntop.o sock_ntop_host.o sock_get_port.o tcp_listen.o readline.o writen.o
 	$(LINK.cpp) -o $@ $^ $(LIB_PATH) $(LIBS) $(SOCKET_LIBS) $(CRYPTO_LIBS)
 
 
