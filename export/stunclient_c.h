@@ -1,9 +1,15 @@
 #ifndef STUNCLIENT_C_H
 #define STUNCLIENT_C_H
 
+#ifdef USE_WINSOCK
+#include <winsock2.h>
+#include <WS2tcpip.h>
+#else
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#endif
+
 #include "nattype_c.h"
 
 struct StunClientArgs_C {

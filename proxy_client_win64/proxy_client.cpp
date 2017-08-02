@@ -2,9 +2,15 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <assert.h>
+#ifdef USE_WINSOCK
+#include <winsock2.h>
+#include <WS2tcpip.h>
+#else
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 #include <getopt.h>
 
 #include <iostream>
@@ -14,6 +20,10 @@
 #include "json_util.h"
 #include "writen.h"
 #include "readline.h"
+#include "inet_ntop.h"
+#include "inet_pton.h"
+
+#define WSVERS            MAKEWORD(2, 0)
 
 void print_results(const struct StunClientResults_C *results)
 {
@@ -53,6 +63,12 @@ int main(int argc, char **argv)
     int opt;
     struct StunClientArgs_C args;
     stun_client_args_c_init(&args);
+
+    WSADATA wsadata;
+    if (WSAStartup(WSVERS, &wsadata) != 0) {
+        printf("WSAStartup failed\n");
+        exit(1);
+    }
 
     while((opt = getopt_long(argc, argv, "m:a:p:f:h", longopts, NULL)) != -1) {
         switch(opt) {
@@ -135,6 +151,21 @@ int main(int argc, char **argv)
 
     print_results(presults.get());
 
-    close(sockfd);
+    closesocket(sockfd);
+
+    WSACleanup();
     return 0;
+}
+
+void stun_client_args_c_init(StunClientArgs_C *args)
+{
+    assert(args);
+
+    memset(args, 0x0, sizeof(*args));
+    args->family = 0;
+    args->remoteServerHost = NULL;
+    args->remoteServerPort = 0;
+    args->localAddr = NULL;
+    args->localPort = 0;
+    args->mode = NULL;
 }
