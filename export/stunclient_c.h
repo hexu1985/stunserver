@@ -1,7 +1,7 @@
 #ifndef STUNCLIENT_C_H
 #define STUNCLIENT_C_H
 
-#ifdef USE_WINSOCK
+#if (defined WIN32 || defined _WIN32) && !defined USE_BSD
 #include <winsock2.h>
 #include <WS2tcpip.h>
 #else
@@ -45,7 +45,7 @@ extern "C" {
 void stun_client_args_c_init(struct StunClientArgs_C *args);
 int stun_client_udp_loop(const struct StunClientArgs_C *args, struct StunClientResults_C *results);
 
-#ifdef USE_WINSOCK
+#if (defined WIN32 || defined _WIN32) && !defined USE_BSD
 void set_proxy_port(int port);
 int get_proxy_port();
 #endif
