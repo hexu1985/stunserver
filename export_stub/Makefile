@@ -3,7 +3,7 @@ include ../common.inc
 DEFINES := -DDEBUG -DUSE_WINSOCK #-DNDEBUG
 
 PROJECT_TARGET := stunproxyclient
-PROJECT_OBJS := json_util.o sock_ntop.o sock_ntop_host.o sock_get_port.o readline.o writen.o proxy_client.o inet_ntop.o inet_pton.o stunclient_c_stub.o
+PROJECT_OBJS := json_util.o sock_ntop.o sock_ntop_host.o sock_get_port.o readline.o writen.o clientmain.o inet_ntop.o inet_pton.o stunclient_c_stub.o
 
 
 #rapidjson: cd .. && git clone https://github.com/miloyip/rapidjson.git

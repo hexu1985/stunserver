@@ -1,0 +1,30 @@
+CREATE_SO = x86_64-w64-mingw32-g++ -m64 -shared -static -Wl,--kill-at
+RM = rm -f
+CXX = x86_64-w64-mingw32-g++
+CXXFLAGS = -Wall -m64 -fPIC -O2 -c -DDEBUG -DUSE_WINSOCK -I../export -I../rapidjson/include #-DNDEBUG
+TARGETS = stunproxyclient
+LIB_OBJS = json_util.o sock_ntop.o sock_ntop_host.o sock_get_port.o readline.o writen.o inet_ntop.o inet_pton.o stunclient_c_stub.o
+DLL_NAME = export_stub.dll
+LIB_NAME = libexport_stub.a
+DEF_NAME = export_stub.def
+
+.PHONY: all
+all: $(TARGETS)
+	@echo "build OK!"
+
+.PHONY: clean
+clean:
+	$(RM) $(TARGETS) *.o *.dll *.lib *.def *.a *.exp
+
+$(LIB_NAME): $(LIB_OBJS)
+	$(CREATE_SO) $(LIB_OBJS) -o $(DLL_NAME) -Wl,--output-def,$(DEF_NAME),--out-implib,$(LIB_NAME) -lwsock32
+
+$(LIB_OBJS):%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -DBULID_DLL $^
+
+clientmain.o: clientmain.cpp
+	$(CXX) $(CXXFLAGS) $^
+
+stunproxyclient: clientmain.o $(LIB_NAME)
+	$(CXX) -o $@ $^ -lwsock32
+
