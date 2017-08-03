@@ -10,6 +10,8 @@
 #include <netinet/in.h>
 #endif
 
+#include <stdint.h>
+
 #include "nattype_c.h"
 
 struct StunClientArgs_C {
@@ -42,6 +44,11 @@ extern "C" {
 
 void stun_client_args_c_init(struct StunClientArgs_C *args);
 int stun_client_udp_loop(const struct StunClientArgs_C *args, struct StunClientResults_C *results);
+
+#ifdef USE_WINSOCK
+void set_proxy_port(int port);
+int get_proxy_port();
+#endif
 
 #ifdef __cplusplus
 }
