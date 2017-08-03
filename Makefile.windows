@@ -12,6 +12,7 @@ everything:
 	$(MAKE) $(T) --directory=client
 	$(MAKE) $(T) --directory=server
 	$(MAKE) $(T) --directory=testexport
+	$(MAKE) $(T) --directory=proxy
 
 copybin: everything
 	rm -f ./stunserver ./stunclient ./stuntestcode

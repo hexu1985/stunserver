@@ -1,12 +1,12 @@
-BOOST_INCLUDE := -I/mingw32/include
+BOOST_INCLUDE := -I/mingw32/include -I../rapidjson/include
 #OPENSSL_INCLUDE := -I/Users/jselbie/openssl/include
 
-DEFINES := -DNDEBUG
+DEFINES := -DDEBUG #-DNDEBUG
 
 # CLANG compiler works fine
 # CXX := /usr/bin/clang++
 
-STANDARD_FLAGS := -Wall -Wuninitialized -static
+STANDARD_FLAGS := -Wall -Wuninitialized -std=c++11
 
 RELEASE_FLAGS := -O2
 DEBUG_FLAGS := -g
