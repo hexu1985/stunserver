@@ -254,8 +254,7 @@ HRESULT UdpClientLoop(StunClientLogicConfig& config, const ClientSocketConfig& s
     CSocketAddress addrRemote; // who we
     CSocketAddress addrLocal;
     int ret;
-    fd_set set;
-    timeval tv = {};
+    struct pollfd       client[1];
     std::string strAddr;
     std::string strAddrLocal;
 
@@ -327,12 +326,11 @@ HRESULT UdpClientLoop(StunClientLogicConfig& config, const ClientSocketConfig& s
 
         // now wait for a response
         spMsg->SetSize(0);
-        FD_ZERO(&set);
-        FD_SET(sock, &set);
-        tv.tv_usec = 500000; // half-second
-        tv.tv_sec = config.timeoutSeconds;
+        client[0].fd = sock;
+        client[0].events = POLLRDNORM;
 
-        ret = select(sock+1, &set, NULL, NULL, &tv);
+        ret = poll(client, 1, 500); // half-second
+
         if (ret > 0)
         {
             ret = ::recvfromex(sock, spMsg->GetData(), spMsg->GetAllocatedSize(), MSG_DONTWAIT, &addrRemote, &addrLocal);
