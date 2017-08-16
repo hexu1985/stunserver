@@ -1,7 +1,7 @@
 CREATE_SO = x86_64-w64-mingw32-g++ -m64 -shared -static -Wl,--kill-at
 RM = rm -f
 CXX = x86_64-w64-mingw32-g++
-CXXFLAGS = -Wall -m64 -fPIC -O2 -c -DDEBUG -D_WIN32_WINNT=0x0600 -I../common -I../stuncore -I../networkutils -I../resources -I../export #-DNDEBUG
+CXXFLAGS = -Wall -m64 -fPIC -O2 -c -DNDEBUG -D_WIN32_WINNT=0x0600 -I../common -I../stuncore -I../networkutils -I../resources -I../export #-DNDEBUG
 TARGETS = stunclient
 LIB_OBJS = stunclient_c.o logger.o socketaddress.o stringhelper.o getconsolewidth.o resolvehostname.o \
 				stunsocket.o buffer.o stunclientlogic.o stunclienttests.o \
@@ -10,6 +10,7 @@ LIB_OBJS = stunclient_c.o logger.o socketaddress.o stringhelper.o getconsolewidt
 DLL_NAME = export_aio.dll
 LIB_NAME = libexport_aio.a
 DEF_NAME = export_aio.def
+VPATH := ../export ../common ../networkutils ../stuncore
 
 .PHONY: all
 all: $(TARGETS)
@@ -20,7 +21,7 @@ clean:
 	$(RM) $(TARGETS) *.o *.dll *.lib *.def *.a *.exp
 
 $(LIB_NAME): $(LIB_OBJS)
-	$(CREATE_SO) $(LIB_OBJS) -o $(DLL_NAME) -Wl,--output-def,$(DEF_NAME),--out-implib,$(LIB_NAME) -lwsock32
+	$(CREATE_SO) $(LIB_OBJS) -o $(DLL_NAME) -Wl,--output-def,$(DEF_NAME),--out-implib,$(LIB_NAME) -lws2_32 -lcrypto -lGdi32
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -DBULID_DLL $^
