@@ -15,7 +15,41 @@
 #include "stunclient.txtcode"
 #include "stunclient_lite.txtcode"
 
+#include <mutex>
+
 namespace {
+
+#ifdef _WIN32
+struct WSADATA_Guard {
+    WSADATA_Guard() {
+        if (WSAStartup(MAKEWORD(2, 0), &wsadata) != 0) {
+            printf("WSAStartup failed\n");
+            exit(1);
+        }
+    }
+
+    ~WSADATA_Guard() {
+        WSACleanup();
+    }
+
+    WSADATA wsadata;
+};
+
+std::shared_ptr<WSADATA_Guard> wsadata_guard;
+
+std::once_flag init_wsadata_guard_flag;
+
+void init_wsadata_guard()
+{   
+    wsadata_guard.reset(new WSADATA_Guard);
+}
+
+std::shared_ptr<WSADATA_Guard> get_wsadata_guard()
+{
+    std::call_once(init_wsadata_guard_flag, &init_wsadata_guard);
+    return wsadata_guard;
+}
+#endif
 
 struct ClientSocketConfig
 {
@@ -264,7 +298,6 @@ HRESULT UdpClientLoop(StunClientLogicConfig& config, const ClientSocketConfig& s
 
     CStunClientLogic clientlogic;
 
-
     hr = clientlogic.Initialize(config);
     
     if (FAILED(hr))
@@ -406,6 +439,10 @@ int stun_client_udp_loop(const struct StunClientArgs_C *args, struct StunClientR
 {
     StunClientLogicConfig config;
     ClientSocketConfig socketconfig;
+
+#ifdef _WIN32
+	auto guard = get_wsadata_guard();
+#endif
 
     HRESULT hr;
     hr = CreateConfigFromArgs(*args, &config, &socketconfig);
