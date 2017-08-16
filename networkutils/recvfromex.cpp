@@ -18,6 +18,8 @@
 
 #include "commonincludes.hpp"
 #include "socketaddress.h"
+#include <string>
+using std::string;
 
 
 static void InitSocketAddress(int family, CSocketAddress* pAddr)
@@ -41,6 +43,93 @@ static void InitSocketAddress(int family, CSocketAddress* pAddr)
 }
 
 
+#ifdef _WIN32
+ssize_t recvfromex(int sockfd, void* buf, size_t len, int flags, CSocketAddress* pSrcAddr, CSocketAddress* pDstAddr)
+{
+    GUID WSARecvMsg_GUID = WSAID_WSARECVMSG;
+    LPFN_WSARECVMSG WSARecvMsg;
+    char ControlBuffer[1000];
+    DWORD NumberOfBytes;
+    string ErrorMessage, Address;
+    WSABUF WSABuf;
+    WSAMSG Msg;
+    int nResult;
+    nResult = WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER,
+            &WSARecvMsg_GUID, sizeof WSARecvMsg_GUID,
+            &WSARecvMsg, sizeof WSARecvMsg,
+            &NumberOfBytes, NULL, NULL);
+    if (nResult == SOCKET_ERROR) {
+        int ErrorCode = WSAGetLastError();
+        fprintf(stderr, "WSAIoctl error: %d\n", ErrorCode);
+        return -1;
+    }
+
+    sockaddr_storage addrRemote = {};
+    Msg.name = (sockaddr *) &addrRemote;
+    Msg.namelen = sizeof(addrRemote);
+    WSABuf.buf = (char *)buf;
+    WSABuf.len = len;
+    Msg.lpBuffers = &WSABuf;
+    Msg.dwBufferCount = 1;
+    Msg.Control.buf = ControlBuffer;
+    Msg.Control.len = sizeof ControlBuffer;
+    Msg.dwFlags = 0;
+
+    nResult = WSARecvMsg(sockfd, &Msg, &NumberOfBytes, NULL, NULL);
+    if (nResult == SOCKET_ERROR) {
+        int ErrorCode = WSAGetLastError();
+        fprintf(stderr, "WSARecvMsg error: %d\n", ErrorCode);
+        return -2;
+    }
+
+    if (pSrcAddr)
+    {
+        *pSrcAddr = CSocketAddress(*(sockaddr*)&addrRemote);
+    }
+
+    if (pDstAddr)
+    {
+        WSACMSGHDR *pCMsgHdr = NULL;
+
+        InitSocketAddress(addrRemote.ss_family, pDstAddr);
+
+
+        for (pCMsgHdr = WSA_CMSG_FIRSTHDR(&Msg); pCMsgHdr != NULL; pCMsgHdr = WSA_CMSG_NXTHDR(&Msg, pCMsgHdr))
+        {
+            // IPV6 address ----------------------------------------------------------
+            if ((pCMsgHdr->cmsg_level == IPPROTO_IPV6) && (pCMsgHdr->cmsg_type == IPV6_PKTINFO) && WSA_CMSG_DATA(pCMsgHdr))
+            {
+                struct in6_pktinfo* pInfo = (in6_pktinfo*)WSA_CMSG_DATA(pCMsgHdr);
+                sockaddr_in6 addr = {};
+                addr.sin6_family = AF_INET6;
+                addr.sin6_addr = pInfo->ipi6_addr;
+                *pDstAddr = CSocketAddress(addr);
+                break;
+            }
+
+
+            // IPV4 address ----------------------------------------------------------
+            // if you change the ifdef's below, make sure you it's matched with the same logic in stunsocket.cpp
+            // Might be worthwhile to just use IP_RECVORIGDSTADDR and IP_ORIGDSTADDR so we can merge with the bsd code
+
+#ifdef IP_PKTINFO
+            if ((pCMsgHdr->cmsg_level == IPPROTO_IP) && (pCMsgHdr->cmsg_type==IP_PKTINFO) && WSA_CMSG_DATA(pCMsgHdr))
+            {
+                struct in_pktinfo* pInfo = (in_pktinfo*)WSA_CMSG_DATA(pCMsgHdr);
+                sockaddr_in addr = {};
+                addr.sin_family = AF_INET;
+                addr.sin_addr = pInfo->ipi_addr;
+                *pDstAddr = CSocketAddress(addr);
+                break;
+            }
+#endif
+        }
+
+    }
+
+    return nResult;
+}
+#else
 ssize_t recvfromex(int sockfd, void* buf, size_t len, int flags, CSocketAddress* pSrcAddr, CSocketAddress* pDstAddr)
 {
     struct iovec vec;
@@ -123,4 +212,5 @@ ssize_t recvfromex(int sockfd, void* buf, size_t len, int flags, CSocketAddress*
 
     return ret;
 }
+#endif
 

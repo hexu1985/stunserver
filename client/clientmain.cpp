@@ -197,6 +197,7 @@ HRESULT CreateConfigFromCommandLine(ClientCmdLineArgs& args, StunClientLogicConf
         localport = (uint16_t)(unsigned int)nPort;
     }
 
+#if 0
     // local address ------------------------------------------
     if (StringHelper::IsNullOrEmpty(args.strLocalAddr.c_str()) == false)
     {
@@ -209,6 +210,7 @@ HRESULT CreateConfigFromCommandLine(ClientCmdLineArgs& args, StunClientLogicConf
     }
     else
     {
+#endif
         if (socketconfig.family == AF_INET6)
         {
             sockaddr_in6 addr6 = {};
@@ -220,7 +222,9 @@ HRESULT CreateConfigFromCommandLine(ClientCmdLineArgs& args, StunClientLogicConf
         {
             socketconfig.addrLocal = CSocketAddress(0,localport);
         }
+#if 0
     }
+#endif
 
     // mode ---------------------------------------------
     StringHelper::ToLower(args.strMode);
@@ -402,7 +406,7 @@ void TcpClientLoop(StunClientLogicConfig& config, ClientSocketConfig& socketconf
         pData = spMsg->GetData();
         while (bytes_sent < bytes_to_send)
         {
-            ret = ::send(sock, pData+bytes_sent, bytes_to_send-bytes_sent, 0);
+            ret = ::send(sock, (char *)pData+bytes_sent, bytes_to_send-bytes_sent, 0);
             if (ret < 0)
             {
                 hrResult = ERRNOHR;
@@ -439,7 +443,7 @@ void TcpClientLoop(StunClientLogicConfig& config, ClientSocketConfig& socketconf
                 break;
             }
             
-            ret = ::recv(sock, pData+bytes_recv, readsize, 0);
+            ret = ::recv(sock, (char *)pData+bytes_recv, readsize, 0);
             if (ret == 0)
             {
                 // server cut us off before we got all the bytes we thought we were supposed to get?
@@ -538,7 +542,7 @@ HRESULT UdpClientLoop(StunClientLogicConfig& config, const ClientSocketConfig& s
                 Logging::LogMsg(LL_DEBUG, "Sending message to %s", strAddr.c_str());
             }
 
-            ret = ::sendto(sock, spMsg->GetData(), spMsg->GetSize(), 0, addrDest.GetSockAddr(), addrDest.GetSockAddrLength());
+            ret = ::sendto(sock, (char *)spMsg->GetData(), spMsg->GetSize(), 0, addrDest.GetSockAddr(), addrDest.GetSockAddrLength());
 
             if (ret <= 0)
             {
@@ -571,7 +575,7 @@ HRESULT UdpClientLoop(StunClientLogicConfig& config, const ClientSocketConfig& s
         ret = select(sock+1, &set, NULL, NULL, &tv);
         if (ret > 0)
         {
-            ret = ::recvfromex(sock, spMsg->GetData(), spMsg->GetAllocatedSize(), MSG_DONTWAIT, &addrRemote, &addrLocal);
+            ret = ::recvfromex(sock, spMsg->GetData(), spMsg->GetAllocatedSize(), 0, &addrRemote, &addrLocal);
             if (ret > 0)
             {
                 addrLocal.SetPort(stunSocket.GetLocalAddress().GetPort()); // recvfromex doesn't fill in the dest port value, only dest IP

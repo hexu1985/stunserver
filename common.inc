@@ -1,7 +1,7 @@
-#BOOST_INCLUDE := -I/Users/jselbie/boost_1_63_0
+BOOST_INCLUDE := -I/mingw32/include
 #OPENSSL_INCLUDE := -I/Users/jselbie/openssl/include
 
-DEFINES := -DNDEBUG
+DEFINES := -DNDEBUG -D_WIN32_WINNT=0x0600
 
 # CLANG compiler works fine
 # CXX := /usr/bin/clang++

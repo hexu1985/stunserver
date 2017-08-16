@@ -127,13 +127,13 @@ HRESULT CStunSocket::EnablePktInfoImpl(int level, int option1, int option2, bool
     
     if (option1 != -1)
     {
-        ret = setsockopt(_sock, level, option1, &enable, sizeof(enable));
+        ret = setsockopt(_sock, level, option1, (const char *) &enable, sizeof(enable));
     }
     
     if ((ret < 0) && (option2 != -1))
     {
         enable = fEnable?1:0;
-        ret = setsockopt(_sock, level, option2, &enable, sizeof(enable));
+        ret = setsockopt(_sock, level, option2, (const char *) &enable, sizeof(enable));
     }
     
     ChkIfA(ret < 0, ERRNOHR);
@@ -214,6 +214,30 @@ HRESULT CStunSocket::SetV6Only(int sock)
     return hr;
 }
 
+#ifdef _WIN32
+HRESULT CStunSocket::SetNonBlocking(bool fEnable)
+{
+    HRESULT hr = S_OK;
+    int result;
+    int flags;
+    
+    if (fEnable)
+    {    
+        flags = 1;
+    }
+    else
+    {
+        flags = 0;
+    }
+    
+    result = ioctlsocket(_sock , FIONBIO, (unsigned long *) &flags);
+    
+    ChkIf(result == -1, ERRNOHR);
+    
+Cleanup:
+    return hr;
+}
+#else
 HRESULT CStunSocket::SetNonBlocking(bool fEnable)
 {
     HRESULT hr = S_OK;
@@ -240,6 +264,7 @@ HRESULT CStunSocket::SetNonBlocking(bool fEnable)
 Cleanup:
     return hr;
 }
+#endif
 
 
 void CStunSocket::UpdateAddresses()
@@ -296,7 +321,7 @@ HRESULT CStunSocket::InitCommon(int socktype, const CSocketAddress& addrlocal, S
     if (fSetReuseFlag)
     {
         int fAllow = 1;
-        ret = ::setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &fAllow, sizeof(fAllow));
+        ret = ::setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char *) &fAllow, sizeof(fAllow));
         ChkIf(ret == -1, ERRNOHR);
     }
     

@@ -50,6 +50,7 @@
 #include <sys/termios.h>
 #else
 
+#include <mswsock.h>
 #include <winsock2.h>
 #include <WS2tcpip.h>
 #include <string.h>
