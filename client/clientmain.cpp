@@ -613,7 +613,14 @@ int main(int argc, char** argv)
     ClientSocketConfig socketconfig;
     bool fError = false;
     uint32_t loglevel = LL_ALWAYS;
-    
+
+#ifdef _WIN32
+    WSADATA wsadata;
+    if (WSAStartup(MAKEWORD(2, 0), &wsadata)) {
+        fprintf(stderr, "WSAStartup failed\n");
+        exit(1);
+    }
+#endif
 
 #ifdef DEBUG
     loglevel = LL_DEBUG;
@@ -678,6 +685,10 @@ int main(int argc, char** argv)
     {
         UdpClientLoop(config, socketconfig);
     }
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
 
     return 0;
 }

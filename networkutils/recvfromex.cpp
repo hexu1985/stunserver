@@ -127,7 +127,7 @@ ssize_t recvfromex(int sockfd, void* buf, size_t len, int flags, CSocketAddress*
 
     }
 
-    return nResult;
+    return NumberOfBytes;
 }
 #else
 ssize_t recvfromex(int sockfd, void* buf, size_t len, int flags, CSocketAddress* pSrcAddr, CSocketAddress* pDstAddr)

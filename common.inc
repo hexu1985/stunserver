@@ -6,7 +6,7 @@ DEFINES := -DNDEBUG -D_WIN32_WINNT=0x0600
 # CLANG compiler works fine
 # CXX := /usr/bin/clang++
 
-STANDARD_FLAGS := -Wall -Wuninitialized 
+STANDARD_FLAGS := -Wall -Wuninitialized -g
 
 RELEASE_FLAGS := -O2
 DEBUG_FLAGS := -g
