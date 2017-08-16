@@ -1,0 +1,4 @@
+制作msvc兼容dll
+1)# make -f Makefile.win64
+2)cmd && cd 到当目录 && C:\msys64\home\Administrator\stunserver\export_stub>"\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\lib.exe"  /machine:x64 /DEF:export_aio.def
+3)cp export_aio.* dll_test/dll_test
