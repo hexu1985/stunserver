@@ -42,7 +42,11 @@ void CStunSocket::Close()
 {
     if (_sock != -1)
     {
+#ifdef _WIN32
+        closesocket(_sock);
+#else
         close(_sock);
+#endif
         _sock = -1;
     }
     Reset();
