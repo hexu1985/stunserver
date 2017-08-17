@@ -5,7 +5,7 @@ PROJECT_TARGET := libexport_aio.a
 PROJECT_OBJS := stunclient_c.o logger.o socketaddress.o stringhelper.o getconsolewidth.o resolvehostname.o \
 				stunsocket.o buffer.o stunclientlogic.o stunclienttests.o \
 				stunbuilder.o datastream.o stunutils.o stunreader.o getmillisecondcounter.o \
-				recvfromex.o prettyprint.o cmdlineparser.o atomichelpers.o
+				recvfromex.o prettyprint.o cmdlineparser.o atomichelpers.o adapters.o
 INCLUDES := $(BOOST_INCLUDE) -I../common -I../stuncore -I../networkutils -I../resources -I../export
 
 

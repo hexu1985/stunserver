@@ -197,7 +197,6 @@ HRESULT CreateConfigFromCommandLine(ClientCmdLineArgs& args, StunClientLogicConf
         localport = (uint16_t)(unsigned int)nPort;
     }
 
-#if 0
     // local address ------------------------------------------
     if (StringHelper::IsNullOrEmpty(args.strLocalAddr.c_str()) == false)
     {
@@ -210,7 +209,6 @@ HRESULT CreateConfigFromCommandLine(ClientCmdLineArgs& args, StunClientLogicConf
     }
     else
     {
-#endif
         if (socketconfig.family == AF_INET6)
         {
             sockaddr_in6 addr6 = {};
@@ -222,9 +220,7 @@ HRESULT CreateConfigFromCommandLine(ClientCmdLineArgs& args, StunClientLogicConf
         {
             socketconfig.addrLocal = CSocketAddress(0,localport);
         }
-#if 0
     }
-#endif
 
     // mode ---------------------------------------------
     StringHelper::ToLower(args.strMode);
@@ -614,7 +610,7 @@ int main(int argc, char** argv)
     bool fError = false;
     uint32_t loglevel = LL_ALWAYS;
 
-#ifdef _WIN32
+#ifdef WIN32
     WSADATA wsadata;
     if (WSAStartup(MAKEWORD(2, 0), &wsadata)) {
         fprintf(stderr, "WSAStartup failed\n");
@@ -686,7 +682,7 @@ int main(int argc, char** argv)
         UdpClientLoop(config, socketconfig);
     }
 
-#ifdef _WIN32
+#ifdef WIN32
     WSACleanup();
 #endif
 

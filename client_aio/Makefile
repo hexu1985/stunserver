@@ -5,13 +5,12 @@ PROJECT_TARGET := stunclient
 PROJECT_OBJS := clientmain.o logger.o socketaddress.o stringhelper.o getconsolewidth.o resolvehostname.o \
 				stunsocket.o buffer.o stunclientlogic.o stunclienttests.o recvfromex.o \
 				stunbuilder.o datastream.o stunutils.o stunreader.o getmillisecondcounter.o \
-				prettyprint.o cmdlineparser.o atomichelpers.o
-#	adapters.o 
+				prettyprint.o cmdlineparser.o atomichelpers.o adapters.o 
 
 INCLUDES := $(BOOST_INCLUDE) -I../common -I../stuncore -I../networkutils -I../resources
 LIB_PATH := -L../common -L../stuncore -L../networkutils
 LIBS := -lws2_32 #-lnetworkutils -lstuncore -lcommon 
-#-lwsock32 
+# 当使用mingw32编译时, 去掉-lws_32
 
 all: $(PROJECT_TARGET)
 

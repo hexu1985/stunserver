@@ -152,7 +152,6 @@ HRESULT CreateConfigFromArgs(const StunClientArgs_C& args, StunClientLogicConfig
         localport = args.localPort;
     }
 
-#if 0
     // local address ------------------------------------------
     if (args.localAddr)
     {
@@ -165,7 +164,6 @@ HRESULT CreateConfigFromArgs(const StunClientArgs_C& args, StunClientLogicConfig
     }
     else
     {
-#endif
         if (socketconfig.family == AF_INET6)
         {
             sockaddr_in6 addr6 = {};
@@ -177,9 +175,7 @@ HRESULT CreateConfigFromArgs(const StunClientArgs_C& args, StunClientLogicConfig
         {
             socketconfig.addrLocal = CSocketAddress(0,localport);
         }
-#if 0
     }
-#endif
 
     // mode ---------------------------------------------
     if (args.mode)

@@ -21,6 +21,46 @@
 #include "socketaddress.h"
 
 
+#ifdef _WIN32
+HRESULT GetSocketAddressForAdapter(int family, const char* pszAdapterName, uint16_t port, CSocketAddress* pSocketAddr)
+{
+    if (pszAdapterName == NULL || pszAdapterName[0] == '\0' || pSocketAddr == NULL)
+        return E_INVALIDARG;
+
+    // If pszAdapterName is an IP address, convert it into a sockaddr and compare the address field with that of the adapter
+    struct sockaddr_storage addr;
+    uint8_t addrbytes[sizeof(in6_addr)] = {};
+    int cpysize = (family == AF_INET) ? sizeof(in_addr) : sizeof(in6_addr);
+
+    ((sockaddr *) &addr)->sa_family = family;
+
+    if (inet_pton(family, pszAdapterName, addrbytes) == 1)
+    {
+        if (family == AF_INET)
+        {
+            sockaddr_in *pAddr4 = (sockaddr_in*)(&addr);
+            memcpy(&(pAddr4->sin_addr), addrbytes, cpysize);
+        }
+        else
+        {
+            sockaddr_in6 *pAddr6 = (sockaddr_in6*)(&addr);
+            memcpy(&(pAddr6->sin6_addr), addrbytes, cpysize);
+        }
+    }
+    else
+    {
+        fprintf(stderr, "%s, inet_pton error!\n", __func__);
+        return E_FAIL;
+    }
+
+
+    *pSocketAddr = CSocketAddress(addr);
+    pSocketAddr->SetPort(port);
+
+    return S_OK;
+}
+
+#else
 void GetDefaultAdapters(int family, ifaddrs* pList, ifaddrs** ppAddrPrimary, ifaddrs** ppAddrAlternate)
 {
     ifaddrs* pAdapter = NULL;
@@ -195,5 +235,6 @@ Cleanup:
     return hr;
 
 }
+#endif
 
 

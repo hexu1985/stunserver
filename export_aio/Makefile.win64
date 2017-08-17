@@ -6,7 +6,7 @@ TARGETS = stunclient
 LIB_OBJS = stunclient_c.o logger.o socketaddress.o stringhelper.o getconsolewidth.o resolvehostname.o \
 				stunsocket.o buffer.o stunclientlogic.o stunclienttests.o \
 				stunbuilder.o datastream.o stunutils.o stunreader.o getmillisecondcounter.o \
-				recvfromex.o prettyprint.o cmdlineparser.o atomichelpers.o
+				recvfromex.o prettyprint.o cmdlineparser.o atomichelpers.o adapters.o
 DLL_NAME = export_aio.dll
 LIB_NAME = libexport_aio.a
 DEF_NAME = export_aio.def
